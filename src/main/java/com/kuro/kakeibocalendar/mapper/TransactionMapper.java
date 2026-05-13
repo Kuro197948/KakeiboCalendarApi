@@ -15,4 +15,8 @@ public interface TransactionMapper {
     Transaction findById(Long id);
 
     List<Transaction> findByDate(LocalDate transactionDate);
+
+    void update(Transaction transaction);
+
+    void deleteById(Long id);
 }

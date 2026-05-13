@@ -37,4 +37,24 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> findByDate(LocalDate transactionDate) {
         return transactionMapper.findByDate(transactionDate);
     }
+
+    @Override
+    public Transaction update(Long id, TransactionRequest request) {
+        Transaction transaction = new Transaction();
+        transaction.setId(id);
+        transaction.setTransactionDate(request.getTransactionDate());
+        transaction.setType(request.getType());
+        transaction.setAmount(request.getAmount());
+        transaction.setCategoryId(request.getCategoryId());
+        transaction.setMemo(request.getMemo());
+
+        transactionMapper.update(transaction);
+
+        return transactionMapper.findById(id);
+    }
+
+    @Override
+    public void delete(Long id) {
+        transactionMapper.deleteById(id);
+    }
 }

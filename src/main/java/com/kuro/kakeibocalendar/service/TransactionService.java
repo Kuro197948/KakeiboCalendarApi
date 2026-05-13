@@ -11,4 +11,8 @@ public interface TransactionService {
     Transaction create(TransactionRequest request);
 
     List<Transaction> findByDate(LocalDate transactionDate);
+
+    Transaction update(Long id, TransactionRequest request);
+
+    void delete(Long id);
 }

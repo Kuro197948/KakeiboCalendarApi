@@ -67,5 +67,19 @@
         WHERE t.transaction_date = #{transactionDate}
         ORDER BY t.id
     </select>
+    <update id="update">
+        UPDATE transactions
+        SET
+            transaction_date = #{transactionDate},
+            type = #{type},
+            amount = #{amount},
+            category_id = #{categoryId},
+            memo = #{memo}
+        WHERE id = #{id}
+    </update>
 
+    <delete id="deleteById">
+        DELETE FROM transactions
+        WHERE id = #{id}
+    </delete>
 </mapper>
