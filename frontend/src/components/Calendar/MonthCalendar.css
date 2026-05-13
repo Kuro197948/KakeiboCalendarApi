@@ -2,6 +2,10 @@
   width: min(100%, 430px);
   margin: 0 auto;
   padding: 16px;
+  transition:
+    transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.5s ease,
+    opacity 0.5s ease;
 }
 
 .calendar-title {
@@ -9,6 +13,10 @@
   margin-bottom: 16px;
   font-size: 24px;
   color: #333;
+  transition:
+    opacity 0.42s ease,
+    transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.42s ease;
 }
 
 .calendar-grid {
@@ -19,6 +27,10 @@
 
 .calendar-week-header {
   margin-bottom: 8px;
+  transition:
+    opacity 0.42s ease,
+    transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.42s ease;
 }
 
 .calendar-week-header div {
@@ -26,6 +38,12 @@
   font-weight: bold;
   color: #333;
   padding: 4px 0;
+}
+
+.calendar-body {
+  transition:
+    transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.5s ease;
 }
 
 .calendar-cell {
@@ -41,16 +59,21 @@
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   transition:
-    transform 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.46s ease,
-    box-shadow 0.24s ease,
-    border-color 0.24s ease;
-  will-change: transform, opacity;
+    filter 0.46s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  will-change: transform, opacity, filter;
 }
 
 .calendar-cell:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
+.calendar-cell:disabled {
+  color: #333;
 }
 
 .calendar-cell.empty {
@@ -60,32 +83,44 @@
   cursor: default;
 }
 
+.calendar-entering .calendar-title,
+.calendar-entering .calendar-week-header {
+  opacity: 0.06;
+  transform: scale(0.86) translateY(-8px);
+  filter: blur(6px);
+}
+
+.calendar-entering .calendar-body {
+  transform: scale(0.84);
+  filter: blur(4px);
+}
+
+.calendar-entering .calendar-cell:not(.calendar-cell-focused):not(.empty) {
+  opacity: 0.03;
+  filter: blur(8px);
+  transform: scale(0.58);
+  pointer-events: none;
+}
+
 .calendar-cell-focused {
-  z-index: 12;
+  z-index: 20;
   opacity: 1;
   border-color: #333;
-  transform: scale(1.08);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+  transform: scale(1.42);
+  box-shadow: 0 28px 58px rgba(0, 0, 0, 0.28);
+  filter: blur(0);
 }
 
 .calendar-cell-focused:hover {
-  transform: scale(1.08);
+  transform: scale(1.42);
 }
 
-.calendar-cell-scatter {
-  pointer-events: none;
-  transform:
-    translate(var(--scatter-x), var(--scatter-y))
-    scale(0.9)
-    rotate(var(--scatter-rotate));
-  opacity: 0;
-}
-
-.calendar-cell-scatter:hover {
-  transform:
-    translate(var(--scatter-x), var(--scatter-y))
-    scale(0.9)
-    rotate(var(--scatter-rotate));
+.calendar-wrap.no-transition,
+.calendar-wrap.no-transition .calendar-title,
+.calendar-wrap.no-transition .calendar-week-header,
+.calendar-wrap.no-transition .calendar-body,
+.calendar-wrap.no-transition .calendar-cell {
+  transition: none !important;
 }
 
 .day-number {

@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import "./DayDetailLayer.css";
 
 const CLOSE_DISTANCE = 120;
+const FIXED_TOP = 24;
 
 function DayDetailLayer({
   selectedDate,
@@ -101,31 +102,25 @@ function DayDetailLayer({
     const maxCardWidth = 420;
     const cardWidth = Math.min(maxCardWidth, window.innerWidth - margin * 2);
 
-    if (!originRect) {
-      return {
-        left: "50%",
-        top: "50%",
-        width: `${cardWidth}px`,
-        transform: `translate(-50%, -50%) translate(${dragState.x}px, ${
-          dragState.y
-        }px) rotate(${dragState.x / 28}deg)`,
-        opacity: dragState.isClosing ? 0 : 1,
-      };
-    }
+    const baseLeft = Math.max((window.innerWidth - cardWidth) / 2, margin);
 
-    const centerX = originRect.left + originRect.width / 2;
+    const originCenterX = originRect
+      ? originRect.left + originRect.width / 2
+      : window.innerWidth / 2;
 
-    const baseLeft = Math.min(
-      Math.max(centerX - cardWidth / 2, margin),
-      window.innerWidth - cardWidth - margin
-    );
+    const originCenterY = originRect
+      ? originRect.top + originRect.height / 2
+      : FIXED_TOP + 40;
 
-    const baseTop = Math.max(originRect.top - 280, margin);
+    const originX = originCenterX - baseLeft;
+    const originY = originCenterY - FIXED_TOP;
 
     return {
       left: `${baseLeft}px`,
-      top: `${baseTop}px`,
+      top: `${FIXED_TOP}px`,
       width: `${cardWidth}px`,
+      "--open-origin-x": `${originX}px`,
+      "--open-origin-y": `${originY}px`,
       transform: `translate(${dragState.x}px, ${dragState.y}px) rotate(${
         dragState.x / 28
       }deg)`,
@@ -149,79 +144,81 @@ function DayDetailLayer({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        <button className="day-layer-close" type="button" onClick={onClose}>
-          ×
-        </button>
+        <div className="day-layer-content">
+          <button className="day-layer-close" type="button" onClick={onClose}>
+            ×
+          </button>
 
-        <h2 className="day-layer-title">{selectedDate}</h2>
+          <h2 className="day-layer-title">{selectedDate}</h2>
 
-        <div className="day-summary-box">
-          <div>
-            <span>出金</span>
-            <strong className="expense">
-              {expenseTotal.toLocaleString()}円
-            </strong>
+          <div className="day-summary-box">
+            <div>
+              <span>出金</span>
+              <strong className="expense">
+                {expenseTotal.toLocaleString()}円
+              </strong>
+            </div>
+
+            <div>
+              <span>入金</span>
+              <strong className="income">
+                {incomeTotal.toLocaleString()}円
+              </strong>
+            </div>
+
+            <div>
+              <span>差引</span>
+              <strong className={balance < 0 ? "expense" : "income"}>
+                {balance.toLocaleString()}円
+              </strong>
+            </div>
           </div>
 
-          <div>
-            <span>入金</span>
-            <strong className="income">
-              {incomeTotal.toLocaleString()}円
-            </strong>
-          </div>
+          <div className="transaction-list">
+            <h3>明細</h3>
 
-          <div>
-            <span>差引</span>
-            <strong className={balance < 0 ? "expense" : "income"}>
-              {balance.toLocaleString()}円
-            </strong>
-          </div>
-        </div>
+            {transactions.length === 0 ? (
+              <p className="empty-message">この日の記録はまだありません。</p>
+            ) : (
+              transactions.map((item) => (
+                <div className="transaction-item" key={item.id}>
+                  <div>
+                    <strong>{item.categoryName}</strong>
+                    <p>{item.memo || "メモなし"}</p>
+                  </div>
 
-        <div className="transaction-list">
-          <h3>明細</h3>
-
-          {transactions.length === 0 ? (
-            <p className="empty-message">この日の記録はまだありません。</p>
-          ) : (
-            transactions.map((item) => (
-              <div className="transaction-item" key={item.id}>
-                <div>
-                  <strong>{item.categoryName}</strong>
-                  <p>{item.memo || "メモなし"}</p>
+                  <span
+                    className={item.type === "EXPENSE" ? "expense" : "income"}
+                  >
+                    {item.type === "EXPENSE" ? "-" : "+"}
+                    {item.amount.toLocaleString()}円
+                  </span>
                 </div>
+              ))
+            )}
+          </div>
 
-                <span
-                  className={item.type === "EXPENSE" ? "expense" : "income"}
-                >
-                  {item.type === "EXPENSE" ? "-" : "+"}
-                  {item.amount.toLocaleString()}円
-                </span>
-              </div>
-            ))
-          )}
-        </div>
+          <div className="day-action-area">
+            <button
+              type="button"
+              className="expense-button"
+              onClick={(event) =>
+                onAddExpense(event.currentTarget.getBoundingClientRect())
+              }
+            >
+              出金を追加
+            </button>
 
-        <div className="day-action-area">
-          <button
-            type="button"
-            className="expense-button"
-            onClick={(event) =>
-              onAddExpense(event.currentTarget.getBoundingClientRect())
-            }
-          >
-            出金を追加
-          </button>
-
-          <button
-            type="button"
-            className="income-button"
-            onClick={(event) =>
-              onAddIncome(event.currentTarget.getBoundingClientRect())
-            }
-          >
-            入金を追加
-          </button>
+            <button
+              type="button"
+              className="income-button"
+              onClick={(event) =>
+                onAddIncome(event.currentTarget.getBoundingClientRect())
+              }
+            >
+              入金を追加
+            </button>
+          </div>
         </div>
       </div>
     </div>

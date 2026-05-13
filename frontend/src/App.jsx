@@ -15,6 +15,7 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [calendarTransitionDate, setCalendarTransitionDate] = useState(null);
+  const [isCalendarResetting, setIsCalendarResetting] = useState(false);
   const [originRect, setOriginRect] = useState(null);
   const [formOriginRect, setFormOriginRect] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -76,11 +77,17 @@ function App() {
 
   const handleCloseDayLayer = () => {
     setSelectedDate(null);
-    setCalendarTransitionDate(null);
-    setOriginRect(null);
     setFormOriginRect(null);
     setTransactions([]);
     setFormType(null);
+
+    setIsCalendarResetting(true);
+    setCalendarTransitionDate(null);
+    setOriginRect(null);
+
+    window.setTimeout(() => {
+      setIsCalendarResetting(false);
+    }, 50);
   };
 
   const handleOpenForm = (type, rect) => {
@@ -119,6 +126,7 @@ function App() {
         month={month}
         summaries={summaries}
         activeDate={calendarTransitionDate}
+        isResetting={isCalendarResetting}
         onDateClick={handleDateClick}
       />
 
