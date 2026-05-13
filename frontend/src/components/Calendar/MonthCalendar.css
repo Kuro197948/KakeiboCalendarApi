@@ -1,0 +1,94 @@
+.calendar-wrap {
+  width: min(100%, 430px);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.calendar-title {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 24px;
+  color: #333;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-week-header {
+  margin-bottom: 8px;
+}
+
+.calendar-week-header div {
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  padding: 4px 0;
+}
+
+.calendar-cell {
+  width: 100%;
+  min-height: 82px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.calendar-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
+.calendar-cell.empty {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  cursor: default;
+}
+
+.day-number {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.money-summary {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.expense {
+  color: #c0392b;
+}
+
+.income {
+  color: #2471a3;
+}
+
+.balance {
+  margin-top: 2px;
+  font-weight: bold;
+}
+
+.balance.negative {
+  color: #c0392b;
+}
+
+.balance.positive {
+  color: #1e8449;
+}
+
+.no-data {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #888;
+}
