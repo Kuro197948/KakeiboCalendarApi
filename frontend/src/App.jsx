@@ -14,6 +14,7 @@ function App() {
   const [summaries, setSummaries] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [originRect, setOriginRect] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [formType, setFormType] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -50,10 +51,11 @@ function App() {
     loadInitialData();
   }, []);
 
-  const handleDateClick = async (date) => {
+  const handleDateClick = async (date, rect) => {
     try {
       await loadTransactionsByDate(date);
       setSelectedDate(date);
+      setOriginRect(rect);
     } catch (error) {
       console.error(error);
       setErrorMessage("日別明細の取得に失敗しました。");
@@ -62,6 +64,7 @@ function App() {
 
   const handleCloseDayLayer = () => {
     setSelectedDate(null);
+    setOriginRect(null);
     setTransactions([]);
     setFormType(null);
   };
@@ -105,6 +108,7 @@ function App() {
         <DayDetailLayer
           selectedDate={selectedDate}
           transactions={transactions}
+          originRect={originRect}
           onClose={handleCloseDayLayer}
           onAddExpense={() => handleOpenForm("EXPENSE")}
           onAddIncome={() => handleOpenForm("INCOME")}

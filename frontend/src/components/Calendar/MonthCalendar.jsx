@@ -62,7 +62,12 @@ function MonthCalendar({ year, month, summaries, onDateClick }) {
               key={dateKey}
               className="calendar-cell"
               type="button"
-              onClick={() => onDateClick(dateKey)}
+              onClick={(event) =>
+                onDateClick(
+                  dateKey,
+                  event.currentTarget.getBoundingClientRect()
+                )
+              }
             >
               <div className="day-number">{day}</div>
 
