@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuro.kakeibocalendar.mapper.TransactionMapper">
+
+    <resultMap id="TransactionResultMap" type="com.kuro.kakeibocalendar.domain.Transaction">
+        <id property="id" column="id" />
+        <result property="transactionDate" column="transaction_date" />
+        <result property="type" column="type" />
+        <result property="amount" column="amount" />
+        <result property="categoryId" column="category_id" />
+        <result property="categoryName" column="category_name" />
+        <result property="memo" column="memo" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO transactions (
+            transaction_date,
+            type,
+            amount,
+            category_id,
+            memo
+        ) VALUES (
+            #{transactionDate},
+            #{type},
+            #{amount},
+            #{categoryId},
+            #{memo}
+        )
+    </insert>
+
+    <select id="findById" resultMap="TransactionResultMap">
+        SELECT
+            t.id,
+            t.transaction_date,
+            t.type,
+            t.amount,
+            t.category_id,
+            c.name AS category_name,
+            t.memo,
+            t.created_at,
+            t.updated_at
+        FROM transactions t
+        JOIN categories c
+            ON t.category_id = c.id
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="findByDate" resultMap="TransactionResultMap">
+        SELECT
+            t.id,
+            t.transaction_date,
+            t.type,
+            t.amount,
+            t.category_id,
+            c.name AS category_name,
+            t.memo,
+            t.created_at,
+            t.updated_at
+        FROM transactions t
+        JOIN categories c
+            ON t.category_id = c.id
+        WHERE t.transaction_date = #{transactionDate}
+        ORDER BY t.id
+    </select>
+
+</mapper>

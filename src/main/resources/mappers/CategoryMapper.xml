@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuro.kakeibocalendar.mapper.CategoryMapper">
+
+    <resultMap id="CategoryResultMap" type="com.kuro.kakeibocalendar.domain.Category">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="type" column="type" />
+        <result property="displayOrder" column="display_order" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="findAll" resultMap="CategoryResultMap">
+        SELECT
+            id,
+            name,
+            type,
+            display_order,
+            created_at,
+            updated_at
+        FROM categories
+        ORDER BY type, display_order, id
+    </select>
+
+</mapper>

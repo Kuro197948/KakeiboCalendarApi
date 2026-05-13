@@ -1,0 +1,19 @@
+# Maven build output
+target/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+
+# Logs
+*.log
+
+# Environment files
+.env
+src/main/resources/application-local.properties
+
+# OS files
+.DS_Store
+Thumbs.db
