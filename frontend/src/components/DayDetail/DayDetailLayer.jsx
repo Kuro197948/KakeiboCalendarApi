@@ -206,7 +206,9 @@ function DayDetailLayer({
           <button
             type="button"
             className="expense-button"
-            onClick={onAddExpense}
+            onClick={(event) =>
+              onAddExpense(event.currentTarget.getBoundingClientRect())
+            }
           >
             出金を追加
           </button>
@@ -214,7 +216,9 @@ function DayDetailLayer({
           <button
             type="button"
             className="income-button"
-            onClick={onAddIncome}
+            onClick={(event) =>
+              onAddIncome(event.currentTarget.getBoundingClientRect())
+            }
           >
             入金を追加
           </button>

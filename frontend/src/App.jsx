@@ -14,7 +14,9 @@ function App() {
   const [summaries, setSummaries] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [calendarTransitionDate, setCalendarTransitionDate] = useState(null);
   const [originRect, setOriginRect] = useState(null);
+  const [formOriginRect, setFormOriginRect] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [formType, setFormType] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -53,28 +55,42 @@ function App() {
 
   const handleDateClick = async (date, rect) => {
     try {
-      await loadTransactionsByDate(date);
-      setSelectedDate(date);
+      setErrorMessage("");
+      setCalendarTransitionDate(date);
       setOriginRect(rect);
+      setSelectedDate(date);
+      setTransactions([]);
+      setFormType(null);
+      setFormOriginRect(null);
+
+      const transactionData = await fetchTransactionsByDate(date);
+      setTransactions(transactionData);
     } catch (error) {
       console.error(error);
+      setCalendarTransitionDate(null);
+      setOriginRect(null);
+      setSelectedDate(null);
       setErrorMessage("日別明細の取得に失敗しました。");
     }
   };
 
   const handleCloseDayLayer = () => {
     setSelectedDate(null);
+    setCalendarTransitionDate(null);
     setOriginRect(null);
+    setFormOriginRect(null);
     setTransactions([]);
     setFormType(null);
   };
 
-  const handleOpenForm = (type) => {
+  const handleOpenForm = (type, rect) => {
     setFormType(type);
+    setFormOriginRect(rect);
   };
 
   const handleCloseForm = () => {
     setFormType(null);
+    setFormOriginRect(null);
   };
 
   const handleSubmitTransaction = async (transaction) => {
@@ -85,6 +101,7 @@ function App() {
       await loadMonthlySummary();
 
       setFormType(null);
+      setFormOriginRect(null);
     } catch (error) {
       console.error(error);
       setErrorMessage("登録に失敗しました。");
@@ -101,6 +118,7 @@ function App() {
         year={year}
         month={month}
         summaries={summaries}
+        activeDate={calendarTransitionDate}
         onDateClick={handleDateClick}
       />
 
@@ -110,8 +128,8 @@ function App() {
           transactions={transactions}
           originRect={originRect}
           onClose={handleCloseDayLayer}
-          onAddExpense={() => handleOpenForm("EXPENSE")}
-          onAddIncome={() => handleOpenForm("INCOME")}
+          onAddExpense={(rect) => handleOpenForm("EXPENSE", rect)}
+          onAddIncome={(rect) => handleOpenForm("INCOME", rect)}
         />
       )}
 
@@ -120,6 +138,7 @@ function App() {
           selectedDate={selectedDate}
           type={formType}
           categories={categories}
+          originRect={formOriginRect}
           onClose={handleCloseForm}
           onSubmit={handleSubmitTransaction}
         />

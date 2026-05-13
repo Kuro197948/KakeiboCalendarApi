@@ -1,6 +1,10 @@
+import { useEffect, useRef, useState } from "react";
 import "./MonthCalendar.css";
 
-function MonthCalendar({ year, month, summaries, onDateClick }) {
+function MonthCalendar({ year, month, summaries, activeDate, onDateClick }) {
+  const cellRefs = useRef({});
+  const [scatterStyles, setScatterStyles] = useState({});
+
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
 
@@ -21,10 +25,66 @@ function MonthCalendar({ year, month, summaries, onDateClick }) {
     calendarCells.push(day);
   }
 
+  useEffect(() => {
+    if (!activeDate) {
+      setScatterStyles({});
+    }
+  }, [activeDate]);
+
   const formatDateKey = (day) => {
     const monthText = String(month).padStart(2, "0");
     const dayText = String(day).padStart(2, "0");
     return `${year}-${monthText}-${dayText}`;
+  };
+
+  const registerCellRef = (dateKey, element) => {
+    if (element) {
+      cellRefs.current[dateKey] = element;
+    } else {
+      delete cellRefs.current[dateKey];
+    }
+  };
+
+  const buildScatterStyles = (selectedDateKey, selectedRect) => {
+    const selectedCenterX = selectedRect.left + selectedRect.width / 2;
+    const selectedCenterY = selectedRect.top + selectedRect.height / 2;
+
+    const nextStyles = {};
+
+    Object.entries(cellRefs.current).forEach(([dateKey, element]) => {
+      if (!element || dateKey === selectedDateKey) {
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const cellCenterX = rect.left + rect.width / 2;
+      const cellCenterY = rect.top + rect.height / 2;
+
+      const dx = cellCenterX - selectedCenterX;
+      const dy = cellCenterY - selectedCenterY;
+      const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+
+      const directionX = dx / distance;
+      const directionY = dy / distance;
+
+      const spreadDistance = 420 + Math.min(distance * 0.6, 160);
+      const rotate = directionX * 18 + directionY * 8;
+
+      nextStyles[dateKey] = {
+        "--scatter-x": `${directionX * spreadDistance}px`,
+        "--scatter-y": `${directionY * spreadDistance}px`,
+        "--scatter-rotate": `${rotate}deg`,
+      };
+    });
+
+    setScatterStyles(nextStyles);
+  };
+
+  const handleCellClick = (dateKey, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    buildScatterStyles(dateKey, rect);
+    onDateClick(dateKey, rect);
   };
 
   return (
@@ -57,17 +117,26 @@ function MonthCalendar({ year, month, summaries, onDateClick }) {
           const dateKey = formatDateKey(day);
           const summary = summaryMap.get(dateKey);
 
+          const isFocused = activeDate === dateKey;
+          const isScattering = activeDate && activeDate !== dateKey;
+
+          const cellClassName = [
+            "calendar-cell",
+            isFocused ? "calendar-cell-focused" : "",
+            isScattering ? "calendar-cell-scatter" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
           return (
             <button
               key={dateKey}
-              className="calendar-cell"
+              ref={(element) => registerCellRef(dateKey, element)}
+              className={cellClassName}
+              style={scatterStyles[dateKey]}
               type="button"
-              onClick={(event) =>
-                onDateClick(
-                  dateKey,
-                  event.currentTarget.getBoundingClientRect()
-                )
-              }
+              onClick={(event) => handleCellClick(dateKey, event)}
+              disabled={Boolean(activeDate)}
             >
               <div className="day-number">{day}</div>
 

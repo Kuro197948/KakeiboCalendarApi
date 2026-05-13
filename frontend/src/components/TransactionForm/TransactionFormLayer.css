@@ -1,29 +1,39 @@
 .form-layer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(247, 247, 247, 0.72);
-  backdrop-filter: blur(6px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 18px;
+  background: rgba(247, 247, 247, 0.48);
+  backdrop-filter: blur(7px);
   z-index: 30;
 }
 
 .form-layer-card {
-  position: relative;
-  width: min(100%, 390px);
+  position: fixed;
   background: #fff;
   border-radius: 24px;
   padding: 24px 18px;
   box-shadow: 0 20px 55px rgba(0, 0, 0, 0.22);
-  animation: formZoomIn 0.22s ease;
+  animation: formZoomInFromButton 0.22s ease;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
-@keyframes formZoomIn {
+.form-layer-card.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.form-layer-card input,
+.form-layer-card select,
+.form-layer-card button {
+  touch-action: auto;
+}
+
+@keyframes formZoomInFromButton {
   from {
     opacity: 0;
-    transform: scale(0.88) translateY(18px);
+    transform: scale(0.82) translateY(20px);
   }
 
   to {
