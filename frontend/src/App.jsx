@@ -12,6 +12,9 @@ import TransactionFormLayer from "./components/TransactionForm/TransactionFormLa
 import "./App.css";
 
 function App() {
+  const [currentYear, setCurrentYear] = useState(2026);
+  const [currentMonth, setCurrentMonth] = useState(5);
+
   const [summaries, setSummaries] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -24,10 +27,19 @@ function App() {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const year = 2026;
-  const month = 5;
+  const formatDateKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
-  const loadMonthlySummary = async () => {
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseDateKey = (dateKey) => {
+    return new Date(`${dateKey}T00:00:00`);
+  };
+
+  const loadMonthlySummary = async (year = currentYear, month = currentMonth) => {
     const data = await fetchMonthlySummary(year, month);
     setSummaries(data);
   };
@@ -41,7 +53,7 @@ function App() {
     const loadInitialData = async () => {
       try {
         const [summaryData, categoryData] = await Promise.all([
-          fetchMonthlySummary(year, month),
+          fetchMonthlySummary(currentYear, currentMonth),
           fetchCategories(),
         ]);
 
@@ -75,6 +87,41 @@ function App() {
       setOriginRect(null);
       setSelectedDate(null);
       setErrorMessage("日別明細の取得に失敗しました。");
+    }
+  };
+
+  const handleMoveSelectedDate = async (dayOffset) => {
+    if (!selectedDate) {
+      return;
+    }
+
+    try {
+      setErrorMessage("");
+      setFormType(null);
+      setFormOriginRect(null);
+      setEditingTransaction(null);
+      setTransactions([]);
+
+      const baseDate = parseDateKey(selectedDate);
+      baseDate.setDate(baseDate.getDate() + dayOffset);
+
+      const nextDateKey = formatDateKey(baseDate);
+      const nextYear = baseDate.getFullYear();
+      const nextMonth = baseDate.getMonth() + 1;
+
+      setSelectedDate(nextDateKey);
+      setCalendarTransitionDate(nextDateKey);
+
+      if (nextYear !== currentYear || nextMonth !== currentMonth) {
+        setCurrentYear(nextYear);
+        setCurrentMonth(nextMonth);
+        await loadMonthlySummary(nextYear, nextMonth);
+      }
+
+      await loadTransactionsByDate(nextDateKey);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("日付の変更に失敗しました。");
     }
   };
 
@@ -113,7 +160,9 @@ function App() {
   };
 
   const handleBalanceTap = () => {
-    alert("差引は入金と出金から自動計算されます。変更する場合は、入金または出金の金額を変更してください。");
+    alert(
+      "差引は入金と出金から自動計算されます。変更する場合は、入金または出金の金額を変更してください。"
+    );
   };
 
   const handleSubmitTransaction = async (transaction) => {
@@ -125,7 +174,7 @@ function App() {
       }
 
       await loadTransactionsByDate(selectedDate);
-      await loadMonthlySummary();
+      await loadMonthlySummary(currentYear, currentMonth);
 
       setFormType(null);
       setFormOriginRect(null);
@@ -143,8 +192,8 @@ function App() {
       {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       <MonthCalendar
-        year={year}
-        month={month}
+        year={currentYear}
+        month={currentMonth}
         summaries={summaries}
         activeDate={calendarTransitionDate}
         isResetting={isCalendarResetting}
@@ -157,6 +206,9 @@ function App() {
           transactions={transactions}
           originRect={originRect}
           onClose={handleCloseDayLayer}
+          onPrevDate={() => handleMoveSelectedDate(-1)}
+          onNextDate={() => handleMoveSelectedDate(1)}
+          onDateTitleClick={handleCloseDayLayer}
           onAddExpense={(rect) => handleOpenForm("EXPENSE", rect)}
           onAddIncome={(rect) => handleOpenForm("INCOME", rect)}
           onEditTransaction={handleOpenEditForm}

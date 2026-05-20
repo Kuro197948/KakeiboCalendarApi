@@ -9,6 +9,9 @@ function DayDetailLayer({
   transactions,
   originRect,
   onClose,
+  onPrevDate,
+  onNextDate,
+  onDateTitleClick,
   onAddExpense,
   onAddIncome,
   onEditTransaction,
@@ -179,7 +182,34 @@ function DayDetailLayer({
             ×
           </button>
 
-          <h2 className="day-layer-title">{selectedDate}</h2>
+          <div className="day-date-nav">
+            <button
+              type="button"
+              className="day-date-arrow"
+              onClick={onPrevDate}
+              aria-label="前の日へ"
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              className="day-title-button"
+              onClick={onDateTitleClick}
+              aria-label="カレンダーに戻る"
+            >
+              {selectedDate}
+            </button>
+
+            <button
+              type="button"
+              className="day-date-arrow"
+              onClick={onNextDate}
+              aria-label="次の日へ"
+            >
+              ›
+            </button>
+          </div>
 
           <div className="day-summary-box">
             <button
