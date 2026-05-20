@@ -50,6 +50,8 @@ function TransactionFormLayer({
   const typeLabel = actualType === "EXPENSE" ? "出金" : "入金";
   const modeLabel = editingTransaction ? "変更" : "追加";
 
+  const displayAmount = amount ? Number(amount).toLocaleString() : "0";
+
   const handlePointerDown = (event) => {
     if (event.target.closest("input, select, textarea, button")) {
       return;
@@ -153,6 +155,28 @@ function TransactionFormLayer({
     };
   };
 
+  const appendNumber = (value) => {
+    setAmount((prev) => {
+      if (prev.length >= 9) {
+        return prev;
+      }
+
+      if (prev === "" || prev === "0") {
+        return value === "00" ? "0" : value;
+      }
+
+      return `${prev}${value}`;
+    });
+  };
+
+  const deleteLastNumber = () => {
+    setAmount((prev) => prev.slice(0, -1));
+  };
+
+  const clearAmount = () => {
+    setAmount("");
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -200,16 +224,64 @@ function TransactionFormLayer({
         </h2>
 
         <form onSubmit={handleSubmit} className="transaction-form">
-          <label>
-            金額
-            <input
-              type="number"
-              min="1"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              placeholder="例：980"
-            />
-          </label>
+          <div className="amount-display-box">
+            <span className="amount-label">金額</span>
+            <strong
+              className={
+                actualType === "EXPENSE"
+                  ? "amount-display expense"
+                  : "amount-display income"
+              }
+            >
+              {displayAmount}円
+            </strong>
+          </div>
+
+          <div className="tenkey-grid">
+            <button type="button" onClick={() => appendNumber("1")}>
+              1
+            </button>
+            <button type="button" onClick={() => appendNumber("2")}>
+              2
+            </button>
+            <button type="button" onClick={() => appendNumber("3")}>
+              3
+            </button>
+
+            <button type="button" onClick={() => appendNumber("4")}>
+              4
+            </button>
+            <button type="button" onClick={() => appendNumber("5")}>
+              5
+            </button>
+            <button type="button" onClick={() => appendNumber("6")}>
+              6
+            </button>
+
+            <button type="button" onClick={() => appendNumber("7")}>
+              7
+            </button>
+            <button type="button" onClick={() => appendNumber("8")}>
+              8
+            </button>
+            <button type="button" onClick={() => appendNumber("9")}>
+              9
+            </button>
+
+            <button type="button" className="sub-key" onClick={clearAmount}>
+              C
+            </button>
+            <button type="button" onClick={() => appendNumber("0")}>
+              0
+            </button>
+            <button type="button" className="sub-key" onClick={deleteLastNumber}>
+              ⌫
+            </button>
+
+            <button type="button" className="sub-key wide" onClick={() => appendNumber("00")}>
+              00
+            </button>
+          </div>
 
           <label>
             科目
