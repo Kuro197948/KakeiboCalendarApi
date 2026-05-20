@@ -8,6 +8,7 @@ function TransactionFormLayer({
   type,
   categories,
   originRect,
+  editingTransaction,
   onClose,
   onSubmit,
 }) {
@@ -24,17 +25,30 @@ function TransactionFormLayer({
   const [categoryId, setCategoryId] = useState("");
   const [memo, setMemo] = useState("");
 
+  const actualType = editingTransaction ? editingTransaction.type : type;
+
   const filteredCategories = categories.filter(
-    (category) => category.type === type
+    (category) => category.type === actualType
   );
 
   useEffect(() => {
+    if (editingTransaction) {
+      setAmount(String(editingTransaction.amount));
+      setCategoryId(String(editingTransaction.categoryId));
+      setMemo(editingTransaction.memo || "");
+      return;
+    }
+
+    setAmount("");
+    setMemo("");
+
     if (filteredCategories.length > 0) {
       setCategoryId(String(filteredCategories[0].id));
     }
-  }, [type, categories]);
+  }, [editingTransaction, actualType, categories]);
 
-  const typeLabel = type === "EXPENSE" ? "出金" : "入金";
+  const typeLabel = actualType === "EXPENSE" ? "出金" : "入金";
+  const modeLabel = editingTransaction ? "変更" : "追加";
 
   const handlePointerDown = (event) => {
     if (event.target.closest("input, select, textarea, button")) {
@@ -154,7 +168,7 @@ function TransactionFormLayer({
 
     onSubmit({
       transactionDate: selectedDate,
-      type,
+      type: actualType,
       amount: Number(amount),
       categoryId: Number(categoryId),
       memo,
@@ -182,7 +196,7 @@ function TransactionFormLayer({
         </button>
 
         <h2 className="form-layer-title">
-          {selectedDate} の{typeLabel}を追加
+          {selectedDate} の{typeLabel}を{modeLabel}
         </h2>
 
         <form onSubmit={handleSubmit} className="transaction-form">
@@ -222,10 +236,12 @@ function TransactionFormLayer({
           </label>
 
           <button
-            className={type === "EXPENSE" ? "submit-expense" : "submit-income"}
+            className={
+              actualType === "EXPENSE" ? "submit-expense" : "submit-income"
+            }
             type="submit"
           >
-            保存する
+            {editingTransaction ? "変更を保存" : "保存する"}
           </button>
         </form>
       </div>

@@ -4,6 +4,7 @@ import { fetchMonthlySummary } from "./api/summaryApi";
 import {
   createTransaction,
   fetchTransactionsByDate,
+  updateTransaction,
 } from "./api/transactionApi";
 import MonthCalendar from "./components/Calendar/MonthCalendar";
 import DayDetailLayer from "./components/DayDetail/DayDetailLayer";
@@ -20,6 +21,7 @@ function App() {
   const [formOriginRect, setFormOriginRect] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [formType, setFormType] = useState(null);
+  const [editingTransaction, setEditingTransaction] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const year = 2026;
@@ -63,6 +65,7 @@ function App() {
       setTransactions([]);
       setFormType(null);
       setFormOriginRect(null);
+      setEditingTransaction(null);
 
       const transactionData = await fetchTransactionsByDate(date);
       setTransactions(transactionData);
@@ -80,6 +83,7 @@ function App() {
     setFormOriginRect(null);
     setTransactions([]);
     setFormType(null);
+    setEditingTransaction(null);
 
     setIsCalendarResetting(true);
     setCalendarTransitionDate(null);
@@ -93,25 +97,42 @@ function App() {
   const handleOpenForm = (type, rect) => {
     setFormType(type);
     setFormOriginRect(rect);
+    setEditingTransaction(null);
+  };
+
+  const handleOpenEditForm = (transaction, rect) => {
+    setFormType(transaction.type);
+    setFormOriginRect(rect);
+    setEditingTransaction(transaction);
   };
 
   const handleCloseForm = () => {
     setFormType(null);
     setFormOriginRect(null);
+    setEditingTransaction(null);
+  };
+
+  const handleBalanceTap = () => {
+    alert("差引は入金と出金から自動計算されます。変更する場合は、入金または出金の金額を変更してください。");
   };
 
   const handleSubmitTransaction = async (transaction) => {
     try {
-      await createTransaction(transaction);
+      if (editingTransaction) {
+        await updateTransaction(editingTransaction.id, transaction);
+      } else {
+        await createTransaction(transaction);
+      }
 
       await loadTransactionsByDate(selectedDate);
       await loadMonthlySummary();
 
       setFormType(null);
       setFormOriginRect(null);
+      setEditingTransaction(null);
     } catch (error) {
       console.error(error);
-      setErrorMessage("登録に失敗しました。");
+      setErrorMessage("登録または更新に失敗しました。");
     }
   };
 
@@ -138,6 +159,8 @@ function App() {
           onClose={handleCloseDayLayer}
           onAddExpense={(rect) => handleOpenForm("EXPENSE", rect)}
           onAddIncome={(rect) => handleOpenForm("INCOME", rect)}
+          onEditTransaction={handleOpenEditForm}
+          onBalanceTap={handleBalanceTap}
         />
       )}
 
@@ -147,6 +170,7 @@ function App() {
           type={formType}
           categories={categories}
           originRect={formOriginRect}
+          editingTransaction={editingTransaction}
           onClose={handleCloseForm}
           onSubmit={handleSubmitTransaction}
         />

@@ -11,6 +11,8 @@ function DayDetailLayer({
   onClose,
   onAddExpense,
   onAddIncome,
+  onEditTransaction,
+  onBalanceTap,
 }) {
   const startPointRef = useRef({ x: 0, y: 0 });
 
@@ -21,13 +23,23 @@ function DayDetailLayer({
     y: 0,
   });
 
-  const expenseTotal = transactions
-    .filter((item) => item.type === "EXPENSE")
-    .reduce((sum, item) => sum + item.amount, 0);
+  const expenseTransactions = transactions.filter(
+    (item) => item.type === "EXPENSE"
+  );
 
-  const incomeTotal = transactions
-    .filter((item) => item.type === "INCOME")
-    .reduce((sum, item) => sum + item.amount, 0);
+  const incomeTransactions = transactions.filter(
+    (item) => item.type === "INCOME"
+  );
+
+  const expenseTotal = expenseTransactions.reduce(
+    (sum, item) => sum + item.amount,
+    0
+  );
+
+  const incomeTotal = incomeTransactions.reduce(
+    (sum, item) => sum + item.amount,
+    0
+  );
 
   const balance = incomeTotal - expenseTotal;
 
@@ -97,6 +109,24 @@ function DayDetailLayer({
     });
   };
 
+  const handleSummaryTap = (type, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const targetTransactions =
+      type === "EXPENSE" ? expenseTransactions : incomeTransactions;
+
+    if (targetTransactions.length === 1) {
+      onEditTransaction(targetTransactions[0], rect);
+      return;
+    }
+
+    if (type === "EXPENSE") {
+      onAddExpense(rect);
+      return;
+    }
+
+    onAddIncome(rect);
+  };
+
   const getAnchorStyle = () => {
     const margin = 16;
     const maxCardWidth = 420;
@@ -152,26 +182,41 @@ function DayDetailLayer({
           <h2 className="day-layer-title">{selectedDate}</h2>
 
           <div className="day-summary-box">
-            <div>
+            <button
+              type="button"
+              className="summary-card summary-action"
+              onClick={(event) => handleSummaryTap("EXPENSE", event)}
+            >
               <span>出金</span>
               <strong className="expense">
                 {expenseTotal.toLocaleString()}円
               </strong>
-            </div>
+              <small>タップして変更</small>
+            </button>
 
-            <div>
+            <button
+              type="button"
+              className="summary-card summary-action"
+              onClick={(event) => handleSummaryTap("INCOME", event)}
+            >
               <span>入金</span>
               <strong className="income">
                 {incomeTotal.toLocaleString()}円
               </strong>
-            </div>
+              <small>タップして変更</small>
+            </button>
 
-            <div>
+            <button
+              type="button"
+              className="summary-card summary-action"
+              onClick={onBalanceTap}
+            >
               <span>差引</span>
               <strong className={balance < 0 ? "expense" : "income"}>
                 {balance.toLocaleString()}円
               </strong>
-            </div>
+              <small>自動計算</small>
+            </button>
           </div>
 
           <div className="transaction-list">
@@ -181,7 +226,17 @@ function DayDetailLayer({
               <p className="empty-message">この日の記録はまだありません。</p>
             ) : (
               transactions.map((item) => (
-                <div className="transaction-item" key={item.id}>
+                <button
+                  className="transaction-item"
+                  type="button"
+                  key={item.id}
+                  onClick={(event) =>
+                    onEditTransaction(
+                      item,
+                      event.currentTarget.getBoundingClientRect()
+                    )
+                  }
+                >
                   <div>
                     <strong>{item.categoryName}</strong>
                     <p>{item.memo || "メモなし"}</p>
@@ -193,7 +248,7 @@ function DayDetailLayer({
                     {item.type === "EXPENSE" ? "-" : "+"}
                     {item.amount.toLocaleString()}円
                   </span>
-                </div>
+                </button>
               ))
             )}
           </div>

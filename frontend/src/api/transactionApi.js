@@ -12,3 +12,8 @@ export const createTransaction = async (transaction) => {
   const response = await axiosClient.post("/transactions", transaction);
   return response.data;
 };
+
+export const updateTransaction = async (id, transaction) => {
+  const response = await axiosClient.put(`/transactions/${id}`, transaction);
+  return response.data;
+};
